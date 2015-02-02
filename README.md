@@ -6,12 +6,12 @@ This **Dockerfile** is a [trusted build](https://registry.hub.docker.com/u/doomk
 
 ### Installation
 ```
-docker pull doomkin/oracle-xe
+sudo docker pull doomkin/oracle-xe
 ```
 
 ### Run
 ```
-docker run --name oracle-xe -d -P doomkin/oracle-xe
+sudo docker run --name oracle-xe -d -P doomkin/oracle-xe
 ```
 
 ### Connect database
