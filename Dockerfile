@@ -1,7 +1,24 @@
-FROM ubuntu:14.04.1
+#
+# doomkin/docker-oracle-xe-11g Dockerfile
+#
+# https://github.com/doomkin/docker-oracle-xe-11g
+#
+# Based on:
+# https://github.com/doomkin/ubuntu-ssh
+# https://github.com/wnameless/docker-oracle-xe-11g
+#
 
-MAINTAINER Wei-Ming Wu <wnameless@gmail.com>
+# Pull base image
+FROM doomkin/ubuntu-ssh
+MAINTAINER Pavel Nikitin <p.doomkin@ya.ru>
 
+# Set the noninteractive frontend
+ENV DEBIAN_FRONTEND noninteractive
+
+# Update packages
+RUN apt-get update && apt-get upgrade -y
+
+# Copy external files
 ADD chkconfig /sbin/chkconfig
 ADD init.ora /
 ADD initXETemp.ora /
@@ -11,19 +28,11 @@ ADD oracle-xe_11.2.0-1.0_amd64.debac /
 # ADD oracle-xe_11.2.0-1.0_amd64.deb /
 RUN cat /oracle-xe_11.2.0-1.0_amd64.deba* > /oracle-xe_11.2.0-1.0_amd64.deb
 
-# Install sshd
-RUN apt-get install -y openssh-server
-RUN mkdir /var/run/sshd
-RUN echo 'root:admin' | chpasswd
-RUN sed -i 's/PermitRootLogin without-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
-RUN echo "export VISIBLE=now" >> /etc/profile
-
 # Prepare to install Oracle
-RUN apt-get install -y libaio1 net-tools bc
-RUN ln -s /usr/bin/awk /bin/awk
-RUN mkdir /var/lock/subsys
-RUN chmod 755 /sbin/chkconfig
+RUN apt-get install -y libaio1 net-tools bc && \
+    ln -s /usr/bin/awk /bin/awk && \
+    mkdir /var/lock/subsys && \
+    chmod 755 /sbin/chkconfig
 
 # Install Oracle
 RUN dpkg --install /oracle-xe_11.2.0-1.0_amd64.deb
@@ -37,13 +46,14 @@ RUN echo 'export ORACLE_HOME=/u01/app/oracle/product/11.2.0/xe' >> /etc/bash.bas
 RUN echo 'export PATH=$ORACLE_HOME/bin:$PATH' >> /etc/bash.bashrc
 RUN echo 'export ORACLE_SID=XE' >> /etc/bash.bashrc
 
-# Remove installation files
-RUN rm /oracle-xe_11.2.0-1.0_amd64.deb*
+# Cleanup
+RUN rm /oracle-xe_11.2.0-1.0_amd64.deb* && \
+    rm -rf /var/lib/apt/lists/*
 
-EXPOSE 22
-EXPOSE 1521
-EXPOSE 8080
+# Expose ports
+EXPOSE 1521 8080
 
+# Startup
 CMD sed -i -E "s/HOST = [^)]+/HOST = $HOSTNAME/g" /u01/app/oracle/product/11.2.0/xe/network/admin/listener.ora; \
-	service oracle-xe start; \
-	/usr/sbin/sshd -D
+    service oracle-xe start; \
+    /usr/sbin/sshd -D
