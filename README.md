@@ -1,24 +1,23 @@
-docker-oracle-xe-11g
-============================
+# doomkin/oracle-xe Dockerfile
 
-Oracle Express Edition 11g Release 2 on Ubuntu 14.04.1 LTS
+Oracle Database Express Edition 11g Release 2 with SSH key access on Ubuntu 14.04.1 LTS Dockerfile for trusted automated Docker builds.
 
-This **Dockerfile** is a [trusted build](https://registry.hub.docker.com/u/wnameless/oracle-xe-11g/) of [Docker Registry](https://registry.hub.docker.com/).
+This **Dockerfile** is a [trusted build](https://registry.hub.docker.com/u/doomkin/oracle-xe/) of [Docker Registry](https://registry.hub.docker.com/).
 
 ### Installation
 ```
-docker pull wnameless/oracle-xe-11g
+docker pull doomkin/oracle-xe
 ```
 
-Run with 22 and 1521 ports opened:
+### Run
 ```
-docker run -d -p 49160:22 -p 49161:1521 wnameless/oracle-xe-11g
+docker run --name oracle-xe -d -P doomkin/oracle-xe
 ```
 
-Connect database with following setting:
+### Connect database
 ```
 hostname: localhost
-port: 49161
+port: `sudo docker port oracle-xe 1521 | cut -d":" -f2`
 sid: xe
 username: system
 password: oracle
@@ -29,8 +28,14 @@ Password for SYS & SYSTEM
 oracle
 ```
 
-Login by SSH
+### Apex control
 ```
-ssh root@localhost -p 49160
-password: admin
+http://localhost:`sudo docker port oracle-xe 8080 | cut -d":" -f2`
+```
+
+### Login by SSH
+```
+ssh-agent -s
+ssh-add ssh/id_rsa
+ssh root@localhost -p `sudo docker port oracle-xe 22 | cut -d":" -f2`
 ```
