@@ -10,7 +10,7 @@
 
 # Pull base image
 FROM doomkin/ubuntu-ssh
-MAINTAINER Pavel Nikitin <p.doomkin@ya.ru>
+MAINTAINER Pavel Doomkin
 
 # Set the noninteractive frontend
 ENV DEBIAN_FRONTEND noninteractive
